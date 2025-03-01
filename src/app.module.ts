@@ -13,8 +13,19 @@ import { UsersModule } from './module/users/users.module';
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService): TypeOrmModuleOptions => {
+        const type = config.get<string>('DB_TYPE') as 'sqlite' | 'postgres';
+
+        if (type === 'sqlite') {
+          return {
+            type,
+            database: config.get<string>('DB_NAME'),
+            entities: [__dirname + '/entity/*.entity.{ts,js}'],
+            synchronize: true,
+          };
+        }
+
         return {
-          type: config.get<string>('DB_TYPE') as 'postgres' | 'sqlite',
+          type,
           host: config.get<string>('DB_HOST'),
           port: config.get<number>('DB_PORT'),
           password: config.get<string>('DB_PASSWORD'),

@@ -8,3 +8,4 @@ export const DB_USERNAME = env.DB_USERNAME as string;
 export const DB_NAME = env.DB_NAME as string;
 export const DB_SYNC = JSON.parse(env.DB_SYNC as string) as boolean;
 export const DB_LOGGING = JSON.parse(env.DB_LOGGING as string) as boolean;
+export const COOKIE_KEY = env.COOKIE_KEY as string;

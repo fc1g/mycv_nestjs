@@ -19,28 +19,43 @@ const cookieSession = require('cookie-session');
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService): TypeOrmModuleOptions => {
-        const type = config.get<string>('DB_TYPE') as 'sqlite' | 'postgres';
+        const env = config.get<string>('NODE_ENV');
+        const commonConfig: Partial<TypeOrmModuleOptions> = {
+          type: config.get<'sqlite' | 'postgres'>('TYPEORM_CONNECTION')!,
+          entities: [`${__dirname}/entity/*.entity.{ts,js}`],
+        };
 
-        if (type === 'sqlite') {
+        if (env === 'test' || env === 'development') {
           return {
-            type,
-            database: config.get<string>('DB_NAME'),
-            entities: [__dirname + '/entity/*.entity.{ts,js}'],
-            synchronize: true,
-          };
+            ...commonConfig,
+            database: config.get<string>('TYPEORM_DATABASE'),
+            synchronize: JSON.parse(
+              config.get<string>('TYPEORM_SYNCHRONIZE')!,
+            ) as boolean,
+            dropSchema: env === 'test',
+            logging: env === 'development',
+          } as TypeOrmModuleOptions;
         }
 
-        return {
-          type,
-          host: config.get<string>('DB_HOST'),
-          port: config.get<number>('DB_PORT'),
-          password: config.get<string>('DB_PASSWORD'),
-          username: config.get<string>('DB_USERNAME'),
-          database: config.get<string>('DB_NAME'),
-          entities: [__dirname + '/entity/*.entity.{ts,js}'],
-          synchronize: true,
-          logging: true,
-        };
+        if (env === 'production') {
+          return {
+            ...commonConfig,
+            host: config.get<string>('TYPEORM_HOST'),
+            port: config.get<number>('TYPEORM_PORT'),
+            username: config.get<string>('TYPEORM_USERNAME'),
+            password: config.get<string>('TYPEORM_PASSWORD'),
+            database: config.get<string>('TYPEORM_DATABASE'),
+            synchronize: JSON.parse(config.get<string>('TYPEORM_SYNCHRONIZE')!),
+            migrations: [],
+            migrationsRun: true,
+            ssl: {
+              rejectUnauthorized: true,
+            },
+            logging: ['error', 'warn'],
+          } as TypeOrmModuleOptions;
+        }
+
+        throw new Error('Invalid NODE_ENV value');
       },
     }),
     UsersModule,
@@ -57,11 +72,13 @@ const cookieSession = require('cookie-session');
   ],
 })
 export class AppModule {
+  constructor(private configService: ConfigService) {}
+
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(
         cookieSession({
-          keys: ['bsdbsdhs'],
+          keys: [this.configService.get('COOKIE_KEY')],
         }),
       )
       .forRoutes('*');

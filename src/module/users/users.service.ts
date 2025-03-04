@@ -4,8 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/entity/User.entity';
 import { Repository } from 'typeorm';
+import { User } from '../../entity/User.entity';
 
 @Injectable()
 export class UsersService {
@@ -17,7 +17,7 @@ export class UsersService {
     return this.repo.save(user);
   }
 
-  async findOne(id: number | null) {
+  async findOne(id: number) {
     if (!id) {
       throw new BadRequestException('Please provide valid id');
     }

@@ -10,12 +10,12 @@ import {
   Session,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from 'src/auth/auth.service';
-import { CurrentUser } from 'src/auth/decorators/current-user.decorator';
-import { AuthGuard } from 'src/auth/guard/auth.guard';
-import { Serialize } from 'src/common/decorators/serialize.decorator';
-import { User } from 'src/entity/User.entity';
-import { CreateUserDto } from 'src/module/users/dtos/create-user.dto';
+import { AuthService } from '../../auth/auth.service';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { AuthGuard } from '../../auth/guard/auth.guard';
+import { Serialize } from '../../common/decorators/serialize.decorator';
+import { User } from '../../entity/User.entity';
+import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserDto } from './dtos/user.dto';
 import { UsersService } from './users.service';
@@ -47,7 +47,7 @@ export class UsersController {
   @Post('/signup')
   async createUser(
     @Body() { email, password }: CreateUserDto,
-    @Session() session: { userId: number | null },
+    @Session() session: { userId: number },
   ) {
     const user = await this.authService.signup(email, password);
     session.userId = user.id;
@@ -58,7 +58,7 @@ export class UsersController {
   @Post('/signin')
   async signin(
     @Body() { email, password }: CreateUserDto,
-    @Session() session: { userId: number | null },
+    @Session() session: { userId: number },
   ) {
     const user = await this.authService.signin(email, password);
     session.userId = user.id;

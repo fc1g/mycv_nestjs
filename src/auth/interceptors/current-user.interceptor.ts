@@ -4,7 +4,7 @@ import {
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
-import { UsersService } from 'src/module/users/users.service';
+import { UsersService } from '../../module/users/users.service';
 import { Req } from '../types/req';
 
 @Injectable()

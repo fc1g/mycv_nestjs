@@ -1,8 +1,8 @@
-import { User } from 'src/entity/User.entity';
+import { User } from '../../entity/User.entity';
 
 export type Req = {
   currentUser: User;
   session: {
-    userId: number | null;
+    userId: number;
   };
 };
